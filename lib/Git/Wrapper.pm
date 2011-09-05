@@ -9,6 +9,7 @@ our $DEBUG=0;
 use IPC::Open3 () ;
 use Symbol;
 use File::pushd;
+use File::Temp;
 
 sub new {
   my ($class, $arg, %opt) = @_;
@@ -49,6 +50,7 @@ sub _cmd {
   for my $name (keys %$opt) {
     my $val = delete $opt->{$name};
     next if $val eq '0';
+    ( $name, $val ) = $self->_message_tempfile( $val ) if $self->_win32_multiline_commit_msg( $cmd, $name, $val );
     push @cmd, _opt($name) . ($val eq '1' ? "" : "=$val");
   }
   push @cmd, @_;
@@ -79,6 +81,24 @@ sub _cmd {
 
   chomp(@out);
   return @out;
+}
+
+sub _win32_multiline_commit_msg {
+  my ( $self, $cmd, $name, $val ) = @_;
+
+  return 0 if $^O ne "MSWin32";
+  return 0 if $cmd ne "commit";
+  return 0 if $name ne "m" and $name ne "message";
+  return 0 if $val !~ /\n/;
+
+  return 1;
+}
+
+sub _message_tempfile {
+  my ( $self, $message ) = @_;
+  my $tmp = File::Temp->new( UNLINK => 0 );
+  $tmp->print( $message );
+  return ( "file", '"'.$tmp->filename.'"' );
 }
 
 sub AUTOLOAD {
