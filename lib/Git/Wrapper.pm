@@ -93,7 +93,13 @@ sub RUN {
 
   print "status: $?\n" if $DEBUG;
 
-  if ($?) {
+  # In earlier gits (1.5, 1.6, I'm not sure when it changed), "git status"
+  # would exit 1 if there was nothing to commit, or in other cases.  This is
+  # basically insane, and has been fixed, but if we don't require git 1.7, we
+  # should cope with it. -- rjbs, 2012-03-31
+  my $stupid_status = $cmd eq 'status' && @out && ! @err;
+
+  if ($? && ! $stupid_status) {
     die Git::Wrapper::Exception->new(
       output => \@out,
       error  => \@err,
@@ -247,9 +253,16 @@ package Git::Wrapper::Exception;
 sub new { my $class = shift; bless { @_ } => $class }
 
 use overload (
-  q("") => 'error',
+  q("") => '_stringify',
   fallback => 1,
 );
+
+sub _stringify {
+  my ($self) = @_;
+  my $error = $self->error;
+  return $error if $error =~ /\S/;
+  return "git exited non-zero but had no output to stderr";
+}
 
 sub output { join "", map { "$_\n" } @{ shift->{output} } }
 sub error  { join "", map { "$_\n" } @{ shift->{error} } }
