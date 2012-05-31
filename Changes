@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        Splitted up classes inside Git::Wrapper to individual package files
+        Added the handling of ->log({ raw => 1 }) to get the file modifications
 
 0.020     2012-04-28 11:21:55 America/New_York
 
