@@ -13,3 +13,4 @@ MANIFEST
 inc
 META.yml
 .*.swp
+.build
