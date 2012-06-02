@@ -20,7 +20,7 @@ sub id { shift->{id} }
 
 sub attr { shift->{attr} }
 
-sub modifications { @_ > 1 ? (shift->{modifications} = [@_]) : @{shift->{modifications}} }
+sub modifications { my $self = shift; @_ > 1 ? ($self->{modifications} = [@_]) : @{$self->{modifications}} }
 
 sub message { @_ > 1 ? ($_[0]->{message} = $_[1]) : $_[0]->{message} }
 

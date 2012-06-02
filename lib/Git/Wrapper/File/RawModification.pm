@@ -36,6 +36,8 @@ Constructor
 
 =head2 filename
 
+=head2 type
+
 =head2 perms_from
 
 =head2 perms_to
