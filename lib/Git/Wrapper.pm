@@ -218,6 +218,7 @@ sub log {
 
     if ($raw) {
       my @modifications;
+
       while(@out and $out[0] =~ m/^\:(\d{6}) (\d{6}) (\w{7})\.\.\. (\w{7})\.\.\. (\w{1})\t(.*)$/) {
         push @modifications, Git::Wrapper::File::RawModification->new($6,$5,$1,$2,$3,$4);
         shift @out;
