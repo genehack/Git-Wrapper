@@ -86,6 +86,17 @@ sub RUN {
 
     my ($wtr, $rdr, $err);
 
+    local *TEMP;
+    if ($^O eq 'MSWin32' && defined $stdin) {
+        my $file = File::Temp->new;
+        $file->autoflush(1);
+        $file->print($stdin);
+        $file->seek(0,0);
+        open TEMP, '<&=', $file;
+        $wtr = '<&TEMP';
+        undef $stdin;
+    }
+
     $err = Symbol::gensym;
 
     print STDERR join(' ',@cmd),"\n" if $DEBUG;
