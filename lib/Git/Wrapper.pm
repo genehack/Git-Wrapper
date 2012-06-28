@@ -251,6 +251,14 @@ sub log {
   return @logs;
 }
 
+sub supports_hash_object_filters {
+  my $self = shift;
+
+  # The '--no-filters' option to 'git-hash-object' was added in version 1.6.1
+  return 0 if ( versioncmp( $self->version , '1.6.1' ) eq -1 );
+  return 1;
+}
+
 sub supports_log_raw_dates {
   my $self = shift;
 
