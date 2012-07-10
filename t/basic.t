@@ -23,9 +23,13 @@ $git->init;
 $git->config( 'user.name'  , 'Test User'        );
 $git->config( 'user.email' , 'test@example.com' );
 
+# make sure git isn't munging our content so we have consistent hashes
+$git->config( 'core.autocrlf' , 'false' );
+$git->config( 'core.safecrlf' , 'false' );
+
 mkpath(File::Spec->catfile($dir, 'foo'));
 
-IO::File->new(">" . File::Spec->catfile($dir, qw(foo bar)))->print("hello\n");
+IO::File->new(File::Spec->catfile($dir, qw(foo bar)), '>:raw')->print("hello\n");
 
 is_deeply(
   [ $git->ls_files({ o => 1 }) ],
