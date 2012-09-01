@@ -9,7 +9,7 @@ our $DEBUG=0;
 
 # Prevent ANSI color with extreme prejudice
 # https://github.com/genehack/Git-Wrapper/issues/13
-$ENV{GIT_PAGER_IN_USE} = undef;
+delete $ENV{GIT_PAGER_IN_USE};
 
 use File::pushd;
 use File::Temp;

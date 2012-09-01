@@ -2,6 +2,9 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+        Fix the environment in a more sane way, to resolve issues on 5.8.x
+        (introduced in v0.022) (Karen Etheridge)
+
 0.025     2012-07-18 12:38:05 America/New_York
 
         Add 'fatal' option for RequiresExternal dzil plugin
