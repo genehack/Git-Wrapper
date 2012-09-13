@@ -79,6 +79,13 @@ SKIP: {
   cmp_ok(( $log_date - $time ), '<=', 5, 'date');
 }
 
+$git->config( 'log.abbrevCommit', 'true' );
+
+@log = $git->log( $args );
+
+$log = $log[0];
+is($log->id, (split /\s/, $rev_list[0])[0], 'id');
+
 SKIP:
 {
   if ( versioncmp( $git->version , '1.6.3') eq -1 ) {

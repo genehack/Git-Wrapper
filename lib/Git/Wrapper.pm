@@ -199,8 +199,9 @@ sub log {
   my $self = shift;
 
   my $opt  = ref $_[0] eq 'HASH' ? shift : {};
-  $opt->{no_color} = 1;
-  $opt->{pretty}   = 'medium';
+  $opt->{no_color}         = 1;
+  $opt->{pretty}           = 'medium';
+  $opt->{no_abbrev_commit} = 1;
 
   my $raw = defined $opt->{raw} && $opt->{raw};
 
