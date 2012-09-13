@@ -195,6 +195,15 @@ sub version {
   return $version;
 }
 
+sub branch {
+  my $self = shift;
+
+  my $opt = ref $_[0] eq 'HASH' ? shift : {};
+  $opt->{color} = 'never';
+
+  return $self->RUN(branch => $opt,@_);
+}
+
 sub log {
   my $self = shift;
 
@@ -385,6 +394,14 @@ The exception stringifies to the error message.
 =head2 version
 
   my $version = $git->version; # 1.6.1.4.8.15.16.23.42
+
+=head2 branch
+
+  my @branches = $git->branch;
+
+This command intentionally disables ANSI color highlighting in the output. If
+you want ANSI color highlighting, you'll need to bypass via the RUN() method
+(see below).
 
 =head2 log
 
