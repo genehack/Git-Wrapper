@@ -150,7 +150,9 @@ for my $arg_test (@arg_tests) {
 
 $git->checkout({b => 'new_branch'});
 
-my ($new_branch) = grep {m/^\*/} $git->branch;
+my ($new_branch) =
+    grep {m/^\*/}
+    $git->branch( { color => 'never' } ); # No ANSI color escapes
 $new_branch =~ s/^\*\s+|\s+$//g;
 
 is $new_branch, 'new_branch', 'new branch name is correct';
