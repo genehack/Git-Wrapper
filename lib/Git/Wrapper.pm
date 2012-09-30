@@ -199,7 +199,7 @@ sub branch {
   my $self = shift;
 
   my $opt = ref $_[0] eq 'HASH' ? shift : {};
-  $opt->{color} = 'never';
+  $opt->{no_color} = 1;
 
   return $self->RUN(branch => $opt,@_);
 }
