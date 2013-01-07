@@ -23,7 +23,7 @@ use Git::Wrapper::File::RawModification;
 use Git::Wrapper::Log;
 use Git::Wrapper::Statuses;
 
-my $GIT = ( defined $ENV{GIT_WRAPPER_GIT} ) ? $ENV{GIT_WRAPPER_GIT} : 'git';
+our $GIT = ( defined $ENV{GIT_WRAPPER_GIT} ) ? $ENV{GIT_WRAPPER_GIT} : 'git';
 
 sub new {
   my ($class, $arg, %opt) = @_;
