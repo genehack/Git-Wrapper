@@ -61,7 +61,7 @@ sub RUN {
 
   my $opt = ref $_[0] eq 'HASH' ? shift : {};
 
-  my @cmd = $GIT;
+  my @cmd = $self->{'git_binary'} || $GIT;
 
   my $stdin = delete $opt->{-STDIN};
 
@@ -396,6 +396,9 @@ The exception stringifies to the error message.
 
   my $git = Git::Wrapper->new($dir);
 
+  # To force the git binary location
+  my $git = Git::Wrapper->new($dir, 'git_binary' => '/usr/local/bin/git');
+
 =head2 dir
 
   print $git->dir; # /var/foo
@@ -625,8 +628,10 @@ Google Code project page: L<http://code.google.com/p/msysgit/downloads>
 
 =head1 ENVIRONMENT VARIABLES
 
-Git::Wrapper normally uses the first 'git' binary in your path, but if the
-GIT_WRAPPER_GIT environment variable is set, that value will be used instead.
+Git::Wrapper normally uses the first 'git' binary in your path. The original
+override provided to change this was by setting the GIT_WRAPPER_GIT environment
+variable. Now that object creation accepts an override, you are encouraged to
+instead pass the binary location (git_binary) to new on object creation.
 
 =head1 SEE ALSO
 

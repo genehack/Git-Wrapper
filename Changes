@@ -2,6 +2,8 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+	Support specifying the git binary location on new (Todd Rinaldp)
+
 0.028     2012-10-19 06:55:15 America/Los_Angeles
 
         Fix $git->branch compatibility with git < 1.7.1 by tweaking color calling convention (Vyacheslav Matyukhin)
