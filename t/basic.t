@@ -120,15 +120,36 @@ my $excepted_mod = Git::Wrapper::File::RawModification->new(
 );
 is_deeply($raw_log->modifications, $excepted_mod);
 
+sub _timeout (&) {
+    my ($code) = @_;
+
+    my $timeout = 0;
+    eval {
+        local $SIG{ALRM} = sub { $timeout = 1; die "TIMEOUT\n" };
+        # 5 seconds should be more than enough time to fail properly
+        alarm 5;
+        $code->();
+        alarm 0;
+    };
+
+    return $timeout;
+}
+
 SKIP: {
     # Test empty commit message
     IO::File->new(">" . File::Spec->catfile($dir, qw(second_commit)))->print("second_commit\n");
     $git->add('second_commit');
-    eval {
+
+    # If this fails there's a distinct danger it will hang indefinitely
+    my $timeout = _timeout { $git->commit };
+    ok !$timeout && $@, 'Attempt to commit interactively fails quickly'
+        or diag "Timed out!";
+
+    $timeout = _timeout {
       $git->commit({ message => "", 'allow-empty-message' => 1 });
     };
 
-    if ( $@ ){
+    if ( $@ && !$timeout ) {
       my $msg = substr($@,0,50);
       skip $msg, 1;
     }
