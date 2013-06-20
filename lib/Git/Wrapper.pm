@@ -408,7 +408,7 @@ Git::Wrapper object. Replace any hyphens in the git command with underscores
 Methods accept a combination of hashrefs and scalars, which is used to build
 the command used to invoke git. Arguments passed in hashrefs will be
 automatically parsed into option pairs, but the ordering of these in the
-resulting shell command is not guarenteed (with the exceptino of options with
+resulting shell command is not guaranteed (with the exception of options with
 a leading '-'; see below). Options that are passed as plain scalars will
 retain their order. Some examples may help clarify. This code:
 
