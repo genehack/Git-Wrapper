@@ -13,7 +13,6 @@ delete $ENV{GIT_PAGER_IN_USE};
 
 use File::pushd;
 use File::Temp;
-use IPC::Cmd        qw(can_run);
 use IPC::Open3      qw();
 use Scalar::Util    qw(blessed);
 use Sort::Versions;
@@ -161,7 +160,10 @@ sub git {
   return ( defined $ENV{GIT_WRAPPER_GIT} ) ? $ENV{GIT_WRAPPER_GIT} : 'git';
 }
 
-sub has_git_in_path { can_run('git') }
+sub has_git_in_path {
+  require IPC::Cmd;
+  IPC::Cmd::can_run('git');
+}
 
 sub log {
   my $self = shift;
