@@ -1,62 +1,119 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
+
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Git::Wrapper by genehack</title>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Git::Wrapper : Perl wrapper for git(7) command line interface" />
 
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Git::Wrapper</title>
   </head>
+
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>Git::Wrapper</h1>
-        <p>Perl wrapper for git(7) command line interface</p>
 
-        <p class="view"><a href="https://github.com/genehack/Git-Wrapper">View the Project on GitHub <small>genehack/Git-Wrapper</small></a></p>
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/genehack/Git-Wrapper">View on GitHub</a>
 
+          <h1 id="project_title">Git::Wrapper</h1>
+          <h2 id="project_tagline">Perl wrapper for git(7) command line interface</h2>
 
-        <ul>
-          <li><a href="https://github.com/genehack/Git-Wrapper/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/genehack/Git-Wrapper/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/genehack/Git-Wrapper">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h1>NAME</h1>
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/genehack/Git-Wrapper/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/genehack/Git-Wrapper/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="name" class="anchor" href="#name"><span class="octicon octicon-link"></span></a>NAME</h1>
 
 <p>Git::Wrapper - Wrap git(7) command-line interface</p>
 
-<h1>SYNOPSIS</h1>
+<h1>
+<a name="version" class="anchor" href="#version"><span class="octicon octicon-link"></span></a>VERSION</h1>
+
+<p>version 0.032</p>
+
+<h1>
+<a name="synopsis" class="anchor" href="#synopsis"><span class="octicon octicon-link"></span></a>SYNOPSIS</h1>
 
 <pre><code>my $git = Git::Wrapper-&gt;new('/var/foo');
 
 $git-&gt;commit(...)
 print $_-&gt;message for $git-&gt;log;
+
+# specify which git binary to use
+my $git = Git::Wrapper-&gt;new({
+  dir        =&gt; '/var/foo ,
+  git_binary =&gt; '/path/to/git/bin/git' ,
+});
 </code></pre>
 
-<h1>DESCRIPTION</h1>
+<h1>
+<a name="description" class="anchor" href="#description"><span class="octicon octicon-link"></span></a>DESCRIPTION</h1>
 
 <p>Git::Wrapper provides an API for git(7) that uses Perl data structures for
-argument passing, instead of CLI-style <code>--options</code> as <a href="http://search.cpan.org/perldoc?Git">Git</a> does.</p>
+argument passing, instead of CLI-style <code>--options</code> as <a href="https://metacpan.org/pod/Git">Git</a> does.</p>
 
-<h1>METHODS</h1>
+<h1>
+<a name="method-invocation" class="anchor" href="#method-invocation"><span class="octicon octicon-link"></span></a>METHOD INVOCATION</h1>
 
 <p>Except as documented, every git subcommand is available as a method on a
-Git::Wrapper object.  Replace any hyphens in the git command with underscores.</p>
+Git::Wrapper object. Replace any hyphens in the git command with underscores
+(for example, 'git init-db' would become <code>$git-</code>init_db&gt;).</p>
 
-<p>The first argument should be a hashref containing options and their values.
-Boolean options are either true (included) or false (excluded).  The remaining
-arguments are passed as ordinary command arguments.</p>
+<h2>
+<a name="method-arguments" class="anchor" href="#method-arguments"><span class="octicon octicon-link"></span></a>Method Arguments</h2>
 
-<pre><code>$git-&gt;commit({ all =&gt; 1, message =&gt; "stuff" });
+<p>Methods accept a combination of hashrefs and scalars, which is used to build
+the command used to invoke git. Arguments passed in hashrefs will be
+automatically parsed into option pairs, but the ordering of these in the
+resulting shell command is not guaranteed (with the exception of options with
+a leading '-'; see below). Options that are passed as plain scalars will
+retain their order. Some examples may help clarify. This code:</p>
 
-$git-&gt;checkout("mybranch");
+<pre><code>$git-&gt;commit({ message =&gt; "stuff" , all =&gt; 1 });
+</code></pre>
+
+<p>may produce this shell command:</p>
+
+<pre><code>git commit --all --message="stuff"
+</code></pre>
+
+<p>This code, however:</p>
+
+<pre><code>$git-&gt;commit(qw/ --message "stuff" / , { all =&gt; 1 });
+</code></pre>
+
+<p>will always produce this shell command:</p>
+
+<pre><code>git commit --message "stuff" --all
+</code></pre>
+
+<p>In most cases, this exact control over argument ordering is not needed and
+simply passing all options as part of a hashref, and all other options as
+additional list arguments, will be sufficient. In some cases, however, the
+ordering of options to particular git sub-commands is significant, resulting
+in the need for this level of control.</p>
+
+<p><em>N.b.</em> Options that are given with a leading '-' (with the exception of
+special options noted below) are applied as arguments to the <code>git</code> command
+itself; options without a leading '-' are applied as arguments to the
+sub-command. For example:</p>
+
+<pre><code>$git-&gt;command({ -foo =&gt; 1 , bar =&gt; 2 });
+</code></pre>
+
+<p>invokes the command line</p>
+
+<pre><code>git --foo=1 command --bar=2
 </code></pre>
 
 <p><em>N.b.</em> Because of the way arguments are parsed, should you need to pass an
@@ -76,69 +133,124 @@ explicit '0' value to an option (for example, to have the same effect as
 <pre><code>@sha1s_and_titles = $git-&gt;rev_list({ all =&gt; 1, pretty =&gt; 'oneline' });
 </code></pre>
 
+<h3>
+<a name="passing-stringify-able-objects-as-arguments" class="anchor" href="#passing-stringify-able-objects-as-arguments"><span class="octicon octicon-link"></span></a>Passing stringify-able objects as arguments</h3>
+
+<p>Objects may be passed in the place of scalars, assuming those objects overload
+stringification in such a way as to produce a useful value. However, relying
+on this stringification is discouraged and likely to be officially deprecated
+in a subsequent release. Instead, if you have an object that stringifies to a
+meaningful value (<em>e.g.</em>, a <a href="https://metacpan.org/pod/Path::Class">Path::Class</a> object), you should stringify it
+yourself before passing it to <code>Git::Wrapper</code> methods.</p>
+
+<h2>
+<a name="error-handling" class="anchor" href="#error-handling"><span class="octicon octicon-link"></span></a>Error handling</h2>
+
 <p>If a git command exits nonzero, a <code>Git::Wrapper::Exception</code> object will be
-thrown.  It has three useful methods:</p>
+thrown (via <code>die()</code>). These objects have three useful methods:</p>
 
 <ul>
-<li>error</li>
-</ul><p>error message</p>
+<li>
+<p>error</p>
 
-<ul>
-<li>output</li>
-</ul><p>normal output, as a single string</p>
+<p>error message</p>
+</li>
+<li>
+<p>output</p>
 
-<ul>
-<li>status</li>
-</ul><p>the exit status</p>
+<p>normal output, as a single string</p>
+</li>
+<li>
+<p>status</p>
 
-<p>The exception stringifies to the error message.</p>
+<p>the exit status</p>
+</li>
+</ul><p>These exception objects stringify to the error message.</p>
 
-<h2>new</h2>
+<h1>
+<a name="methods" class="anchor" href="#methods"><span class="octicon octicon-link"></span></a>METHODS</h1>
+
+<h2>
+<a name="new" class="anchor" href="#new"><span class="octicon octicon-link"></span></a>new</h2>
 
 <pre><code>my $git = Git::Wrapper-&gt;new($dir);
+my $git = Git::Wrapper-&gt;new({ dir =&gt; $dir , git_binary =&gt; '/path/to/git' });
+
+# To force the git binary location
+my $git = Git::Wrapper-&gt;new($dir, 'git_binary' =&gt; '/usr/local/bin/git');
 </code></pre>
 
-<h2>dir</h2>
+<h2>
+<a name="git" class="anchor" href="#git"><span class="octicon octicon-link"></span></a>git</h2>
+
+<pre><code>print $git-&gt;git; # /path/to/git/binary/being/used
+</code></pre>
+
+<h2>
+<a name="dir" class="anchor" href="#dir"><span class="octicon octicon-link"></span></a>dir</h2>
 
 <pre><code>print $git-&gt;dir; # /var/foo
 </code></pre>
 
-<h2>version</h2>
+<h2>
+<a name="version-1" class="anchor" href="#version-1"><span class="octicon octicon-link"></span></a>version</h2>
 
 <pre><code>my $version = $git-&gt;version; # 1.6.1.4.8.15.16.23.42
 </code></pre>
 
-<h2>log</h2>
+<h2>
+<a name="branch" class="anchor" href="#branch"><span class="octicon octicon-link"></span></a>branch</h2>
+
+<pre><code>my @branches = $git-&gt;branch;
+</code></pre>
+
+<p>This command intentionally disables ANSI color highlighting in the output. If
+you want ANSI color highlighting, you'll need to bypass via the RUN() method
+(see below).</p>
+
+<h2>
+<a name="log" class="anchor" href="#log"><span class="octicon octicon-link"></span></a>log</h2>
 
 <pre><code>my @logs = $git-&gt;log;
 </code></pre>
 
 <p>Instead of giving back an arrayref of lines, the <code>log</code> method returns a list
-of <code>Git::Wrapper::Log</code> objects.  They have four methods:</p>
+of <code>Git::Wrapper::Log</code> objects. They have four methods:</p>
 
 <ul>
 <li>id</li>
 <li>author</li>
 <li>date</li>
 <li>message</li>
-</ul><h2>has_git_in_path</h2>
+</ul><h2>
+<a name="has_git_in_path" class="anchor" href="#has_git_in_path"><span class="octicon octicon-link"></span></a>has_git_in_path</h2>
 
 <p>This method returns a true or false value indicating if there is a 'git'
 binary in the current $PATH.</p>
 
-<h2>supports_status_porcelain</h2>
+<h2>
+<a name="supports_status_porcelain" class="anchor" href="#supports_status_porcelain"><span class="octicon octicon-link"></span></a>supports_status_porcelain</h2>
 
-<h2>supports_log_raw_dates</h2>
+<h2>
+<a name="supports_log_no_abbrev_commit" class="anchor" href="#supports_log_no_abbrev_commit"><span class="octicon octicon-link"></span></a>supports_log_no_abbrev_commit</h2>
+
+<h2>
+<a name="supports_log_raw_dates" class="anchor" href="#supports_log_raw_dates"><span class="octicon octicon-link"></span></a>supports_log_raw_dates</h2>
+
+<h2>
+<a name="supports_hash_object_filters" class="anchor" href="#supports_hash_object_filters"><span class="octicon octicon-link"></span></a>supports_hash_object_filters</h2>
 
 <p>These methods return a true or false value (1 or 0) indicating whether the git
 binary being used has support for these options. (The '--porcelain' option on
-'git status' and the '--date=raw' option on 'git log', respectively.)</p>
+'git status', the '--no-abbrev-commit' and '--date=raw' options on 'git log',
+and the '--no-filters' option on 'git hash-object' respectively.)</p>
 
 <p>These are primarily for use in this distribution's test suite, but may also be
 useful when writing code using Git::Wrapper that might be run with different
 versions of the underlying git binary.</p>
 
-<h2>status</h2>
+<h2>
+<a name="status" class="anchor" href="#status"><span class="octicon octicon-link"></span></a>status</h2>
 
 <p>When running with an underlying git binary that returns false for the
 <a href="#supports_status_porcelain">"supports_status_porcelain"</a> method, this method will act like any other
@@ -173,8 +285,8 @@ uncommitted changes.</p>
 <li>changed : Changed but not in the index (aka, won't be committed)</li>
 <li>unknown : Untracked files</li>
 <li>conflict : Merge conflicts</li>
-</ul><p>Note that a single file can occur in more than one group.  Eg, a modified file
-that has been added to the index will appear in the 'indexed' list.  If it is
+</ul><p>Note that a single file can occur in more than one group. Eg, a modified file
+that has been added to the index will appear in the 'indexed' list. If it is
 subsequently further modified it will additionally appear in the 'changed'
 group.</p>
 
@@ -183,13 +295,13 @@ group.</p>
 <pre><code>my $from = $status-&gt;from;
 </code></pre>
 
-<p>The file path of the changed file, relative to the repo root.  For renames,
+<p>The file path of the changed file, relative to the repo root. For renames,
 this is the original path.</p>
 
 <pre><code>my $to = $status-&gt;to;
 </code></pre>
 
-<p>Renames returns the new path/name for the path.  In all other cases returns
+<p>Renames returns the new path/name for the path. In all other cases returns
 an empty string.</p>
 
 <pre><code>my $mode = $status-&gt;mode;
@@ -223,7 +335,8 @@ redundant but at least consistent).</p>
 <li>'deleted by them' : deleted on the branch we are merging in</li>
 </ul><p>See git-status man page for more details.</p>
 
-<h3>Example</h3>
+<h3>
+<a name="example" class="anchor" href="#example"><span class="octicon octicon-link"></span></a>Example</h3>
 
 <pre><code>my $git = Git::Wrapper-&gt;new('/path/to/git/repo');
 my $statuses = $git-&gt;status;
@@ -240,7 +353,8 @@ for my $type (qw&lt;indexed changed unknown conflict&gt;) {
 }
 </code></pre>
 
-<h2>RUN</h2>
+<h2>
+<a name="run" class="anchor" href="#run"><span class="octicon octicon-link"></span></a>RUN</h2>
 
 <p>This method bypasses the output rearranging performed by some of the wrapped
 methods described above (i.e., <code>log</code>, <code>status</code>, etc.). This can be useful
@@ -253,7 +367,8 @@ parsed into a <a>Git::Wrapper::Status</a> object.</p>
 subcommand you want to run, followed by a hashref containing options and their
 values, and then a list of any other arguments.</p>
 
-<h3>Example</h3>
+<h3>
+<a name="example-1" class="anchor" href="#example-1"><span class="octicon octicon-link"></span></a>Example</h3>
 
 <pre><code>my $git = Git::Wrapper-&gt;new( '/path/to/git/repo' );
 
@@ -264,7 +379,8 @@ my @log_objects = $git-&gt;log();
 my @log_lines = $git-&gt;RUN('log');
 </code></pre>
 
-<h2>ERR</h2>
+<h2>
+<a name="err" class="anchor" href="#err"><span class="octicon octicon-link"></span></a>ERR</h2>
 
 <p>After a command has been run, this method will return anything that was sent
 to <code>STDERR</code>, in the form of an array of chomped lines. This information will
@@ -272,7 +388,8 @@ be cleared as soon as a new command is executed. This method should <strong>*NOT
 be used as a success/failure check, as <code>git</code> will sometimes produce output on
 STDERR when a command is successful.</p>
 
-<h2>OUT</h2>
+<h2>
+<a name="out" class="anchor" href="#out"><span class="octicon octicon-link"></span></a>OUT</h2>
 
 <p>After a command has been run, this method will return anything that was sent
 to <code>STDOUT</code>, in the form of an array of chomped lines. It is identical to
@@ -281,32 +398,38 @@ simply for symmetry with the <code>ERR</code> method. This method should <strong
 used as a success/failure check, as <code>git</code> will frequently not have any output
 with a successful command.</p>
 
-<h1>COMPATIBILITY</h1>
+<h1>
+<a name="compatibility" class="anchor" href="#compatibility"><span class="octicon octicon-link"></span></a>COMPATIBILITY</h1>
 
 <p>On Win32 Git::Wrapper is incompatible with msysGit installations earlier than
 Git-1.7.1-preview20100612 due to a bug involving the return value of a git
-command in cmd/git.cmd.  If you use the msysGit version distributed with
+command in cmd/git.cmd. If you use the msysGit version distributed with
 GitExtensions or an earlier version of msysGit, tests will fail during
-installation of this module.  You can get the latest version of msysGit on the
+installation of this module. You can get the latest version of msysGit on the
 Google Code project page: <a href="http://code.google.com/p/msysgit/downloads">http://code.google.com/p/msysgit/downloads</a></p>
 
-<h1>ENVIRONMENT VARIABLES</h1>
+<h1>
+<a name="environment-variables" class="anchor" href="#environment-variables"><span class="octicon octicon-link"></span></a>ENVIRONMENT VARIABLES</h1>
 
-<p>Git::Wrapper normally uses the first 'git' binary in your path, but if the
-GIT_WRAPPER_GIT environment variable is set, that value will be used instead.</p>
+<p>Git::Wrapper normally uses the first 'git' binary in your path. The original
+override provided to change this was by setting the GIT_WRAPPER_GIT environment
+variable. Now that object creation accepts an override, you are encouraged to
+instead pass the binary location (git_binary) to new on object creation.</p>
 
-<h1>SEE ALSO</h1>
+<h1>
+<a name="see-also" class="anchor" href="#see-also"><span class="octicon octicon-link"></span></a>SEE ALSO</h1>
 
-<p><a href="http://search.cpan.org/perldoc?VCI::VCS::Git">VCI::VCS::Git</a> is the git implementation for <a href="http://search.cpan.org/perldoc?VCI">VCI</a>, a generic interface to
-version-controle systems.</p>
+<p><a href="https://metacpan.org/pod/VCI::VCS::Git">VCI::VCS::Git</a> is the git implementation for <a href="https://metacpan.org/pod/VCI">VCI</a>, a generic interface to
+version-control systems.</p>
 
 <p><a href="https://metacpan.org/module/Git::Repository#OTHER-PERL-GIT-WRAPPERS">Other Perl Git Wrappers</a>
-is a list of other Git interfaces in Perl. If <a href="http://search.cpan.org/perldoc?Git::Wrapper">Git::Wrapper</a> doesn't scratch
+is a list of other Git interfaces in Perl. If <a href="https://metacpan.org/pod/Git::Wrapper">Git::Wrapper</a> doesn't scratch
 your itch, possibly one of the modules listed there will.</p>
 
 <p>Git itself is at <a href="http://git.or.cz">http://git.or.cz</a>.</p>
 
-<h1>REPORTING BUGS &amp; OTHER WAYS TO CONTRIBUTE</h1>
+<h1>
+<a name="reporting-bugs--other-ways-to-contribute" class="anchor" href="#reporting-bugs--other-ways-to-contribute"><span class="octicon octicon-link"></span></a>REPORTING BUGS &amp; OTHER WAYS TO CONTRIBUTE</h1>
 
 <p>The code for this module is maintained on GitHub, at
 <a href="https://github.com/genehack/Git-Wrapper">https://github.com/genehack/Git-Wrapper</a>. If you have a patch, feel free to
@@ -315,7 +438,8 @@ an issue on the project at GitHub. (We also watch the <a href="http://rt.cpan.or
 queue for Git::Wrapper, so feel free to use that bug reporting system if you
 prefer)</p>
 
-<h1>AUTHORS</h1>
+<h1>
+<a name="authors" class="anchor" href="#authors"><span class="octicon octicon-link"></span></a>AUTHORS</h1>
 
 <ul>
 <li>Hans Dieter Pearcey <a href="mailto:hdp@cpan.org">hdp@cpan.org</a>
@@ -324,19 +448,24 @@ prefer)</p>
 </li>
 <li>John SJ Anderson <a href="mailto:genehack@genehack.org">genehack@genehack.org</a>
 </li>
-</ul><h1>COPYRIGHT AND LICENSE</h1>
+</ul><h1>
+<a name="copyright-and-license" class="anchor" href="#copyright-and-license"><span class="octicon octicon-link"></span></a>COPYRIGHT AND LICENSE</h1>
 
-<p>This software is copyright (c) 2008 by Hans Dieter Pearcey.</p>
+<p>This software is copyright (c) 2014 by Hans Dieter Pearcey.</p>
 
 <p>This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.</p>
       </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/genehack">genehack</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Git::Wrapper maintained by <a href="https://github.com/genehack">genehack</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
       </footer>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
+
               <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
             document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
@@ -347,6 +476,7 @@ the same terms as the Perl 5 programming language system itself.</p>
             pageTracker._trackPageview();
             } catch(err) {}
           </script>
+
 
   </body>
 </html>
