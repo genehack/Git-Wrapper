@@ -2,6 +2,9 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+        bail out early in Makefile.PL if git not installed, instead of failing
+        tests (Karen Etheridge)
+
 0.025     2012-07-18 12:38:05 America/New_York
 
         Add 'fatal' option for RequiresExternal dzil plugin
