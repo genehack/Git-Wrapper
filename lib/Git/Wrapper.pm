@@ -106,6 +106,9 @@ sub RUN {
     local $ENV{GIT_EDITOR} = ' ';
 
     my $pid = IPC::Open3::open3($wtr, $rdr, $err, @cmd);
+
+    binmode $_ , ":encoding(UTF-8)" foreach $wtr, $rdr, $err;
+
     print $wtr $stdin
       if defined $stdin;
 
