@@ -180,45 +180,59 @@ sub log {
   my @out = $self->RUN(log => $opt, @_);
 
   my @logs;
-  while (my $line = shift @out) {
-    die "unhandled: $line" unless $line =~ /^commit (\S+)/;
 
-    my $current = Git::Wrapper::Log->new($1);
-
-    $line = shift @out;         # next line;
-
-    while ($line =~ /^(\S+):\s+(.+)$/) {
-      $current->attr->{lc $1} = $2;
-      $line = shift @out;       # next line;
+  if ( grep /format=/, @_ ) {
+CUSTOM_LOG_FORMAT:
+    if (@out) {
+      # return entire output, don't get into the business of parsing out records
+      require Git::Wrapper::Log::Custom;
+      my $current = Git::Wrapper::Log::Custom->new;
+      $current->output(join "\n", @out);
+      push @logs, $current;
     }
-
-    die "no blank line separating head from message" if $line;
-
-    my ( $initial_indent ) = $out[0] =~ /^(\s*)/ if @out;
-
-    my $message = '';
-    while (
-      @out
-        and $out[0] !~ /^commit (\S+)/
-          and length($line = shift @out)
-        ) {
-      $line =~ s/^$initial_indent//; # strip just the indenting added by git
-      $message .= "$line\n";
-    }
-
-    $current->message($message);
-
-    if ($raw) {
-      my @modifications;
-
-      while(@out and $out[0] =~ m/^\:(\d{6}) (\d{6}) (\w{7})\.\.\. (\w{7})\.\.\. (\w{1})\t(.*)$/) {
-        push @modifications, Git::Wrapper::File::RawModification->new($6,$5,$1,$2,$3,$4);
-        shift @out;
+  }
+  else {
+DEFAULT_LOG_FORMAT:
+    while (my $line = shift @out) {
+      die "unhandled: $line" unless $line =~ /^commit (\S+)/;
+  
+      my $current = Git::Wrapper::Log->new($1);
+  
+      $line = shift @out;         # next line;
+  
+      while ($line =~ /^(\S+):\s+(.+)$/) {
+        $current->attr->{lc $1} = $2;
+        $line = shift @out;       # next line;
       }
-      $current->modifications(@modifications) if @modifications;
+  
+      die "no blank line separating head from message" if $line;
+  
+      my ( $initial_indent ) = $out[0] =~ /^(\s*)/ if @out;
+  
+      my $message = '';
+      while (
+        @out
+          and $out[0] !~ /^commit (\S+)/
+            and length($line = shift @out)
+          ) {
+        $line =~ s/^$initial_indent//; # strip just the indenting added by git
+        $message .= "$line\n";
+      }
+  
+      $current->message($message);
+  
+      if ($raw) {
+        my @modifications;
+  
+        while(@out and $out[0] =~ m/^\:(\d{6}) (\d{6}) (\w{7})\.\.\. (\w{7})\.\.\. (\w{1})\t(.*)$/) {
+          push @modifications, Git::Wrapper::File::RawModification->new($6,$5,$1,$2,$3,$4);
+          shift @out;
+        }
+        $current->modifications(@modifications) if @modifications;
+      }
+  
+      push @logs, $current;
     }
-
-    push @logs, $current;
   }
 
   return @logs;

@@ -70,11 +70,18 @@ like($rev_list[0], qr/^[a-f\d]{40} FIRST$/);
 
 my $args = $git->supports_log_raw_dates ? { date => 'raw' } : {};
 my @log = $git->log( $args );
-is(@log, 1, 'one log entry');
+is(@log, 1, 'one default format log entry');
+
+isa_ok($log[0], q{Git::Wrapper::Log}, 'entry type is Git::Wrapper::Log');
 
 my $log = $log[0];
 is($log->id, (split /\s/, $rev_list[0])[0], 'id');
 is($log->message, "FIRST\n\n\tBODY\n", "message");
+
+@log = $git->log( "--format=%H" );
+
+is(@log, 1, 'one custom format log entry');
+isa_ok($log[0], q{Git::Wrapper::Log::Custom}, 'entry type is Git::Wrapper::Log::Custom');
 
 SKIP: {
   skip 'testing old git without raw date support' , 1
@@ -96,6 +103,11 @@ SKIP:
 
   $log = $log[0];
   is($log->id, (split /\s/, $rev_list[0])[0], 'id');
+
+  @log = $git->log( "--format=%H" );
+
+  is(@log, 1, 'one custom format log entry');
+  isa_ok($log[0], q{Git::Wrapper::Log::Custom}, 'entry type is Git::Wrapper::Log::Custom');
 }
 
 SKIP:
@@ -166,6 +178,11 @@ SKIP: {
 
     @log = $git->log();
     is(@log, 2, 'two log entries, one with empty commit message');
+
+    @log = $git->log( "--format=%H" );
+
+    is(@log, 1, 'one custom format log entry');
+    isa_ok($log[0], q{Git::Wrapper::Log::Custom}, 'entry type is Git::Wrapper::Log::Custom');
 };
 
 
@@ -189,6 +206,11 @@ for my $arg_test (@arg_tests) {
     my ($arg_log) = $git->log('-n 1');
 
     is $arg_log->message, "$msg\n", "argument test: $descr";
+
+    my @log = $git->log( "--format=%H" );
+
+    is(@log, 1, 'one custom format log entry');
+    isa_ok($log[0], q{Git::Wrapper::Log::Custom}, 'entry type is Git::Wrapper::Log::Custom');
 }
 
 $git->checkout({b => 'new_branch'});
