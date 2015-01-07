@@ -723,12 +723,20 @@ with a successful command.
 
 =head1 COMPATIBILITY
 
+=head2 Windows
+
 On Win32 Git::Wrapper is incompatible with msysGit installations earlier than
 Git-1.7.1-preview20100612 due to a bug involving the return value of a git
 command in cmd/git.cmd. If you use the msysGit version distributed with
 GitExtensions or an earlier version of msysGit, tests will fail during
 installation of this module. You can get the latest version of msysGit on the
 Google Code project page: L<http://code.google.com/p/msysgit/downloads>
+
+=head2 Mac OS X
+
+On Mac OS X Git::Wrapper is incompatible with git installations earlier than
+Git-1.7.5. If you wish to use git 1.7.4 or below, tests will fail during the
+installation of this module.
 
 =head1 ENVIRONMENT VARIABLES
 
