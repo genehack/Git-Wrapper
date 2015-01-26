@@ -1,4 +1,5 @@
 package Git::Wrapper::File::RawModification;
+
 # ABSTRACT: Modification of a file in a commit
 
 use 5.006;
@@ -6,27 +7,29 @@ use strict;
 use warnings;
 
 sub new {
-  my ($class, $filename, $type, $perms_from, $perms_to, $blob_from, $blob_to) = @_;
-  return bless {
-    filename   => $filename,
-    type       => $type,
-    perms_from => $perms_from,
-    perms_to   => $perms_to,
-    blob_from  => $blob_from,
-    blob_to    => $blob_to,
-  } => $class;
+    my ( $class, $filename, $type, $perms_from, $perms_to, $blob_from, $blob_to ) = @_;
+    return bless {
+        filename   => $filename,
+        type       => $type,
+        perms_from => $perms_from,
+        perms_to   => $perms_to,
+        blob_from  => $blob_from,
+        blob_to    => $blob_to,
+    } => $class;
 }
 
-sub filename   { shift->{filename} }
-sub type       { shift->{type} }
+sub filename { return shift->{filename} }
+sub type     { return shift->{type} }
 
-sub perms_from { shift->{perms_from} }
-sub perms_to   { shift->{perms_to} }
+sub perms_from { return shift->{perms_from} }
+sub perms_to   { return shift->{perms_to} }
 
-sub blob_from  { shift->{blob_from} }
-sub blob_to    { shift->{blob_to} }
+sub blob_from { return shift->{blob_from} }
+sub blob_to   { return shift->{blob_to} }
 
 1;
+
+__END__
 
 =head1 METHODS
 

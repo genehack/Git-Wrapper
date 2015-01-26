@@ -1,4 +1,5 @@
 package Git::Wrapper::Statuses;
+
 # ABSTRACT: Multiple git statuses information
 
 use 5.006;
@@ -10,26 +11,28 @@ use Git::Wrapper::Status;
 sub new { return bless {} => shift }
 
 sub add {
-  my ($self, $type, $mode, $from, $to) = @_;
+    my ( $self, $type, $mode, $from, $to ) = @_;
 
-  my $status = Git::Wrapper::Status->new($mode, $from, $to);
+    my $status = Git::Wrapper::Status->new( $mode, $from, $to );
 
-  push @{ $self->{ $type } }, $status;
+    return push @{ $self->{$type} }, $status;
 }
 
 sub get {
-  my ($self, $type) = @_;
+    my ( $self, $type ) = @_;
 
-  return @{ defined $self->{$type} ? $self->{$type} : [] };
+    return @{ defined $self->{$type} ? $self->{$type} : [] };
 }
 
 sub is_dirty {
-  my( $self ) = @_;
+    my ($self) = @_;
 
-  return keys %$self ? 1 : 0;
+    return keys %$self ? 1 : 0;
 }
 
 1;
+
+__END__
 
 =head1 METHODS
 
