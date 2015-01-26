@@ -41,10 +41,12 @@ my %WriteMakefileArgs = (
     "warnings" => 0
   },
   "TEST_REQUIRES" => {
+    "File::Temp" => 0,
     "File::Path" => 0,
     "File::Spec" => 0,
     "IO::File" => 0,
     "POSIX" => 0,
+    "Sort::Versions" => 0,
     "Test::Deep" => 0,
     "Test::Exception" => 0,
     "Test::More" => 0
