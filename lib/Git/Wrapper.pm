@@ -1,9 +1,9 @@
+package Git::Wrapper;
+#ABSTRACT: Wrap git(7) command-line interface
+
 use 5.006;
 use strict;
 use warnings;
-
-package Git::Wrapper;
-#ABSTRACT: Wrap git(7) command-line interface
 
 our $DEBUG=0;
 
@@ -39,7 +39,7 @@ sub new {
     elsif ( blessed $arg )    { $args = { dir => "$arg" } }  # my objects, let me
                                                              # show you them.
     elsif ( ! ref $arg )      { $args = { dir =>  $arg  } }
-    else { die "Single arg must be hashref, scalar, or stringify-able object" }
+    else { die 'Single arg must be hashref, scalar, or stringify-able object' }
   }
   else {
     my( $dir , %opts ) = @_;
@@ -65,8 +65,8 @@ sub AUTOLOAD {
   return $self->RUN($meth, @_);
 }
 
-sub ERR { shift->{err} }
-sub OUT { shift->{out} }
+sub ERR { return shift->{err} }
+sub OUT { return shift->{out} }
 
 sub RUN {
   my $self = shift;
@@ -150,7 +150,7 @@ sub branch {
   return $self->RUN(branch => $opt,@_);
 }
 
-sub dir { shift->{dir} }
+sub dir { return shift->{dir} }
 
 sub git {
   my $self = shift;
@@ -162,7 +162,7 @@ sub git {
 
 sub has_git_in_path {
   require IPC::Cmd;
-  IPC::Cmd::can_run('git');
+  return IPC::Cmd::can_run('git');
 }
 
 sub log {
@@ -376,6 +376,7 @@ sub _win32_multiline_commit_msg {
   return 1;
 }
 
+1;
 
 __END__
 
