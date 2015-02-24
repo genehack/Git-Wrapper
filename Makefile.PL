@@ -41,6 +41,7 @@ my %WriteMakefileArgs = (
     "warnings" => 0
   },
   "TEST_REQUIRES" => {
+    "File::Temp" => 0,
     "File::Path" => 0,
     "File::Spec" => 0,
     "File::Temp" => 0,
