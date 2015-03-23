@@ -76,6 +76,8 @@ my $log = $log[0];
 is($log->id, (split /\s/, $rev_list[0])[0], 'id');
 is($log->message, "FIRST\n\n\tBODY\n", "message");
 
+throws_ok { $git->log( "--format=%H" ) } q{Git::Wrapper::Exception};
+
 SKIP: {
   skip 'testing old git without raw date support' , 1
     unless $git->supports_log_raw_dates;
@@ -168,6 +170,8 @@ SKIP: {
     is(@log, 2, 'two log entries, one with empty commit message');
 };
 
+my @out = $git->RUN('log','--format=%H');
+ok scalar @out == 2, q{using RUN('log','--format=%H') to get all 2 commit SHAs};
 
 # test --message vs. -m
 my @arg_tests = (

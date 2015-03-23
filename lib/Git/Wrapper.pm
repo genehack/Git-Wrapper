@@ -168,6 +168,10 @@ sub has_git_in_path {
 sub log {
   my $self = shift;
 
+  if ( grep /format=/, @_ ) {
+      die Git::Wrapper::Exception->new( error => [qw/--format not allowed. Use the RUN method if you with to use a custom log format./], output => undef, status => 255 );
+  }
+
   my $opt  = ref $_[0] eq 'HASH' ? shift : {};
   $opt->{no_color}         = 1;
   $opt->{pretty}           = 'medium';
@@ -582,7 +586,9 @@ you want ANSI color highlighting, you'll need to bypass via the RUN() method
   my @logs = $git->log;
 
 Instead of giving back an arrayref of lines, the C<log> method returns a list
-of C<Git::Wrapper::Log> objects. They have four methods:
+of C<Git::Wrapper::Log> objects.
+
+There are four methods in a C<Git::Wrapper::Log> objects:
 
 =over
 
@@ -595,6 +601,18 @@ of C<Git::Wrapper::Log> objects. They have four methods:
 =item * message
 
 =back
+
+=head3 Custom log formats
+
+C<log> will throw an exception if it is passed the C<--format> option. The
+reason for this has to do with the fact that the parsing of the full log
+output into C<Git::Wrapper::Log> objects assumes the default format provided
+by `git` itself. Passing C<--format> to the underlying `git log` method affects
+this assumption and the output is no longer able to be processed as intented.
+
+If you wish to specify a custom log format, please use the L<RUN> method
+directly.  The caller will be supplied with the full log output. From there,
+the caller may process the output as it wishes.
 
 =head2 has_git_in_path
 
@@ -761,6 +779,9 @@ values, and then a list of any other arguments.
 
     # while 'RUN('log')' returns an array of chomped lines
     my @log_lines = $git->RUN('log');
+
+    # getting the full of commit SHAs via `git log` by using the '--format' option
+    my @log_lines = $git->RUN('log', '--format=%H');
 
 =head2 ERR
 
