@@ -11,9 +11,9 @@ our $DEBUG=0;
 # https://github.com/genehack/Git-Wrapper/issues/13
 delete $ENV{GIT_PAGER_IN_USE};
 
+use Capture::Tiny   qw(:all);
 use File::chdir;
 use File::Temp;
-use IPC::Open3      qw();
 use Scalar::Util    qw(blessed);
 use Sort::Versions;
 use Symbol;
@@ -80,41 +80,25 @@ sub RUN {
 
   my @cmd = ( $self->git , @$parts );
 
-  my( @out , @err );
+  print STDERR join(' ',@cmd),"\n" if $DEBUG;
 
+  my( @out , @err );
   {
     local $CWD = $self->dir unless $cmd eq 'clone';
-
-    my ($wtr, $rdr, $err);
-
-    local *TEMP;
-    if ($^O eq 'MSWin32' && defined $stdin) {
-      my $file = File::Temp->new;
-      $file->autoflush(1);
-      $file->print($stdin);
-      $file->seek(0,0);
-      open TEMP, '<&=', $file;
-      $wtr = '<&TEMP';
-      undef $stdin;
-    }
-
-    $err = Symbol::gensym;
-
-    print STDERR join(' ',@cmd),"\n" if $DEBUG;
 
     # Prevent commands from running interactively
     local $ENV{GIT_EDITOR} = ' ';
 
-    my $pid = IPC::Open3::open3($wtr, $rdr, $err, @cmd);
-    print $wtr $stdin
-      if defined $stdin;
+    my ( $out , $err ) = capture {
+      open( my $GIT , "|-" , @cmd ) or die $!;
+      print $GIT $stdin
+        if defined $stdin;
+      close( $GIT ) or warn $!;
+    };
 
-    close $wtr;
-    chomp(@out = <$rdr>);
-    chomp(@err = <$err>);
-
-    waitpid $pid, 0;
-  };
+    @out = split '\n' , $out;
+    @err = split '\n' , $err;
+  }
 
   print "status: $?\n" if $DEBUG;
 
