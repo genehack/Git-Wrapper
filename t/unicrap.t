@@ -43,10 +43,7 @@ my $author = 'Dagfinn Ilmari Mannsåker <ilmari@example.org>';
 $git->commit({ message => 'first commit', author => $author });
 
 my @log = $git->log();
-#utf8::encode($author); # because the log output is octets
+utf8::encode($author); # because the log output is octets
 is($log[0]->author, $author);
-
-use Devel::Peek;
-Dump($log[0]->author);
 
 done_testing();
