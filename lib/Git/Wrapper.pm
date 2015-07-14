@@ -23,6 +23,10 @@ use Git::Wrapper::File::RawModification;
 use Git::Wrapper::Log;
 use Git::Wrapper::Statuses;
 
+use constant USE_ENCODE => $] >= 5.008001;
+require Encode
+  if USE_ENCODE;
+
 sub new {
   my $class = shift;
 
@@ -87,25 +91,41 @@ sub RUN {
 
     my ($wtr, $rdr, $err);
 
+    my $file;
     local *TEMP;
-    if ($^O eq 'MSWin32' && defined $stdin) {
-      my $file = File::Temp->new;
-      $file->autoflush(1);
-      $file->print($stdin);
-      $file->seek(0,0);
-      open TEMP, '<&=', $file;
-      $wtr = '<&TEMP';
-      undef $stdin;
+    if (defined $stdin) {
+      if ($^O eq 'MSWin32') {
+        $file = File::Temp->new;
+        $file->autoflush(1);
+        binmode $file;
+        print { $file } $stdin;
+        seek $file, 0, 0;
+        open TEMP, '<&=', $file;
+        $wtr = '<&TEMP';
+        undef $stdin;
+      }
     }
 
     $err = Symbol::gensym;
 
-    print STDERR join(' ',@cmd),"\n" if $DEBUG;
-
     # Prevent commands from running interactively
     local $ENV{GIT_EDITOR} = ' ';
 
+    # best attempt at encoding
+    @cmd = map { Encode::encode('UTF-8', $_) } @cmd
+      if USE_ENCODE;
+
+    print STDERR join(' ',@cmd),"\n" if $DEBUG;
+
+    system 'chcp', '65001';
     my $pid = IPC::Open3::open3($wtr, $rdr, $err, @cmd);
+
+    binmode $rdr;
+    binmode $err;
+
+    map { binmode $_, ':encoding(UTF-8)' } ($rdr, $err)
+      if USE_ENCODE;
+
     print $wtr $stdin
       if defined $stdin;
 
