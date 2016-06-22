@@ -7,9 +7,16 @@ use warnings;
 
 sub new {
   my ($class, $filename, $type, $perms_from, $perms_to, $blob_from, $blob_to) = @_;
+
+  my $score;
+  if ( defined $type && $type =~ s{^(.)([0-9]+)$}{$1} ) {
+    $score = $2;
+  }
+
   return bless {
     filename   => $filename,
     type       => $type,
+    score 	   => $score,
     perms_from => $perms_from,
     perms_to   => $perms_to,
     blob_from  => $blob_from,
@@ -19,6 +26,7 @@ sub new {
 
 sub filename   { shift->{filename} }
 sub type       { shift->{type} }
+sub score       { shift->{score} }
 
 sub perms_from { shift->{perms_from} }
 sub perms_to   { shift->{perms_to} }
@@ -37,6 +45,8 @@ Constructor
 =head2 filename
 
 =head2 type
+
+=head2 score
 
 =head2 perms_from
 
