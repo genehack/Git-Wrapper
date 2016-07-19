@@ -74,7 +74,7 @@ is(@log, 1, 'one log entry');
 
 my $log = $log[0];
 is($log->id, (split /\s/, $rev_list[0])[0], 'id');
-is($log->message, "FIRST\n\n\tBODY\n", "message");
+like($log->message, qr/FIRST\n\n(?:        |\t)BODY\n/, "message");
 
 throws_ok { $git->log( "--format=%H" ) } q{Git::Wrapper::Exception};
 
