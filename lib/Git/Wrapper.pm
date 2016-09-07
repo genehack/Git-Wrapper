@@ -183,6 +183,8 @@ sub log {
 
   $opt->{no_abbrev_commit} = 1
     if $self->supports_log_no_abbrev_commit;
+  $opt->{no_expand_tabs} = 1
+    if $self->supports_no_expand_tabs;
 
   my $raw = defined $opt->{raw} && $opt->{raw};
 
@@ -302,6 +304,14 @@ sub supports_status_porcelain {
 
   # The '--porcelain' option to git status was added in version 1.7.0
   return 0 if ( versioncmp( $self->version , '1.7' ) eq -1 );
+  return 1;
+}
+
+sub supports_no_expand_tabs {
+  my $self = shift;
+
+  # The '--no-expand-tabs' option to git log was added in version 2.9.0
+  return 0 if ( versioncmp( $self->version , '2.9' ) eq -1 );
   return 1;
 }
 
