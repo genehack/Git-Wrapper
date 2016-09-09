@@ -6,6 +6,7 @@ Revision history for {{$dist->name}}
 
         Fix tabs being expanded in log output in git 2.9+ (Graham Knop)
         Misc POD fixes (gregor herrmann/Debian, Philippe Bruhat)
+        Properly handle scores in raw log files (Atoomic)
 
 0.045     2015-07-19 09:46:07-07:00 America/Los_Angeles
 
