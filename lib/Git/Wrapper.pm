@@ -224,7 +224,7 @@ sub log {
 
       # example output:
       # :000000 100644 0000000000000000000000000000000000000000 ce013625030ba8dba906f756967f9e9ca394464a A     foo/bar
-      while(@out and $out[0] =~ m/^\:(\d{6}) (\d{6}) (\w{40}) (\w{40}) (\w{1})\t(.*)$/) {
+      while(@out and $out[0] =~ m/^\:(\d{6}) (\d{6}) (\w{40}) (\w{40}) (\w{1}[0-9]*)\t(.*)$/) {
         push @modifications, Git::Wrapper::File::RawModification->new($6,$5,$1,$2,$3,$4);
         shift @out;
       }
