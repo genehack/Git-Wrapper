@@ -150,6 +150,10 @@ SKIP: {
   my @third_raw_log = $git->log({ raw => 1, follow => 1}, '-n1', '--', 'foo/barbar');
   is(@third_raw_log, 1, 'one for the third time');
 
+
+  if ( versioncmp( $git->version , '1.7.2') eq -1 ) {
+    skip "testing old git that can't track copies with --follow", 3;
+  }
   my($next_raw_mod_obj) = $third_raw_log[0]->modifications;
   is($next_raw_mod_obj->score(),    100,          'expected copy score');
   is($next_raw_mod_obj->type(),     'C',          'expected copy type');
