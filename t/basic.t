@@ -54,8 +54,10 @@ SKIP: {
   is( $git->status->is_dirty , 1 , 'repo is dirty' );
 }
 
+my $commit_count = 0;
 my $time = time;
 $git->commit({ message => "FIRST\n\n\tBODY\n" });
+$commit_count++;
 
 SKIP: {
   skip 'testing old git without porcelain' , 1 unless $git->supports_status_porcelain;
@@ -130,6 +132,7 @@ SKIP: {
 
   $git->RUN('mv', 'foo/bar', 'foo/bar-moved');
   $git->commit({ message => "move a file" });
+  $commit_count++;
 
   my @second_raw_log = $git->log({ raw => 1, follow => 1 }, '-n1', '--', 'foo/bar-moved');
   is(@second_raw_log, 1, 'still one raw log entry');
@@ -142,10 +145,15 @@ SKIP: {
   system("cp $dir/foo/bar-moved $dir/foo/barbar");
   $git->add('foo/barbar');
   $git->commit({ message => 'copy a file'});
+  $commit_count++;
 
   my @third_raw_log = $git->log({ raw => 1, follow => 1}, '-n1', '--', 'foo/barbar');
   is(@third_raw_log, 1, 'one for the third time');
 
+
+  if ( versioncmp( $git->version , '1.7.2') eq -1 ) {
+    skip "testing old git that can't track copies with --follow", 3;
+  }
   my($next_raw_mod_obj) = $third_raw_log[0]->modifications;
   is($next_raw_mod_obj->score(),    100,          'expected copy score');
   is($next_raw_mod_obj->type(),     'C',          'expected copy type');
@@ -167,8 +175,6 @@ sub _timeout (&) {
     return $timeout;
 }
 
-my $commit_count = 2;
-
 SKIP: {
     if ( versioncmp( $git->version , '1.7.0.5') eq -1 ) {
       skip 'testing old git without commit --allow-empty-message support' , 1;
@@ -185,6 +191,7 @@ SKIP: {
 
     $timeout = _timeout {
       $git->commit({ message => "", 'allow-empty-message' => 1 });
+      $commit_count++;
     };
 
     if ( $@ && !$timeout ) {
@@ -193,12 +200,11 @@ SKIP: {
     }
 
     @log = $git->log();
-    is(@log, 4, 'four log entries, one with empty commit message');
-    $commit_count+=2;
+    is(@log, $commit_count, 'four log entries, one with empty commit message');
 };
 
 my @out = $git->RUN('log','--format=%H');
-ok scalar @out == $commit_count, q{using RUN('log','--format=%H') to get all four commit SHAs};
+is scalar @out, $commit_count, q{using RUN('log','--format=%H') to get all four commit SHAs};
 
 # test --message vs. -m
 my @arg_tests = (
