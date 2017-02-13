@@ -15,7 +15,6 @@ use File::chdir;
 use File::Temp;
 use IPC::Open3      qw();
 use Scalar::Util    qw(blessed);
-use Sort::Versions;
 use Symbol;
 
 use Git::Wrapper::Exception;
@@ -23,7 +22,51 @@ use Git::Wrapper::File::RawModification;
 use Git::Wrapper::Log;
 use Git::Wrapper::Statuses;
 
-sub new {
+use Moo;
+
+has dir => (
+    required => 1,
+    is       => 'ro',
+);
+
+has $_ => (
+    is => 'rw'
+) for qw/ ERR OUT /;
+
+has git_binary => (
+    is => 'ro',
+    lazy => 1,
+    default => sub {
+        return (defined $ENV{GIT_WRAPPER_GIT} ) ? $ENV{GIT_WRAPPER_GIT} : 'git';
+    },
+);
+
+sub git { $_[0]->git_binary }
+
+my %features = (
+        # The '--no-filters' option to 'git-hash-object' was added in version 1.6.1
+    hash_object_filters => '1.6.1',
+        # The '--date=raw' option to 'git log' was added in version 1.6.2
+    log_raw_dates => '1.6.2',
+        # The '--porcelain' option to git status was added in version 1.7.0
+    status_porcelain => '1.7',
+        # The '--no-abbrev-commit' option to 'git log' was added in version 1.7.6
+    log_no_abbrev_commit => '1.7.6',
+        # The '--no-expand-tabs' option to git log was added in version 2.9.0
+    log_no_expand_tabs  => '2.9',
+);
+
+while( my( $feature, $min_version ) = each %features ) {
+    has "supports_$feature" => (
+        is => 'ro',
+        lazy => 1,
+        default => sub {
+            $_[0]->versioncmp( $min_version ) != -1;
+        },
+    );
+}
+
+sub BUILDARGS {
   my $class = shift;
 
   # three calling conventions
@@ -47,11 +90,9 @@ sub new {
     $args = { dir => $dir , %opts }
   }
 
-  my $self = bless $args => $class;
+  die "usage: $class->new(\$dir)" unless $args->{dir};
 
-  die "usage: $class->new(\$dir)" unless $self->dir;
-
-  return $self;
+  return $args;
 }
 
 sub AUTOLOAD {
@@ -65,14 +106,15 @@ sub AUTOLOAD {
   return $self->RUN($meth, @_);
 }
 
-sub ERR { shift->{err} }
-sub OUT { shift->{out} }
+sub clear_outputs {
+    my $self = shift;
+    $self->$_([]) for qw/ ERR OUT /;
+}
 
 sub RUN {
   my $self = shift;
 
-  delete $self->{err};
-  delete $self->{out};
+  $self->clear_outputs;
 
   my $cmd = shift;
 
@@ -133,10 +175,10 @@ sub RUN {
   }
 
   chomp(@err);
-  $self->{err} = \@err;
+  $self->ERR( \@err );
 
   chomp(@out);
-  $self->{out} = \@out;
+  $self->OUT( \@out );
 
   return @out;
 }
@@ -148,16 +190,6 @@ sub branch {
   $opt->{no_color} = 1;
 
   return $self->RUN(branch => $opt,@_);
-}
-
-sub dir { shift->{dir} }
-
-sub git {
-  my $self = shift;
-
-  return $self->{git_binary} if defined $self->{git_binary};
-
-  return ( defined $ENV{GIT_WRAPPER_GIT} ) ? $ENV{GIT_WRAPPER_GIT} : 'git';
 }
 
 sub has_git_in_path {
@@ -279,44 +311,13 @@ sub status {
   return $statuses;
 }
 
-sub supports_hash_object_filters {
-  my $self = shift;
+sub versioncmp {
+    my( $self, $version ) = @_;
 
-  # The '--no-filters' option to 'git-hash-object' was added in version 1.6.1
-  return 0 if ( versioncmp( $self->version , '1.6.1' ) eq -1 );
-  return 1;
+    require Sort::Versions;
+    return Sort::Versions::versioncmp( $self->version, $version );
 }
 
-sub supports_log_no_abbrev_commit {
-  my $self = shift;
-
-  # The '--no-abbrev-commit' option to 'git log' was added in version 1.7.6
-  return ( versioncmp( $self->version , '1.7.6' ) eq -1 ) ? 0 : 1;
-}
-
-sub supports_log_no_expand_tabs {
-  my $self = shift;
-
-  # The '--no-expand-tabs' option to git log was added in version 2.9.0
-  return 0 if ( versioncmp( $self->version , '2.9' ) eq -1 );
-  return 1;
-}
-
-sub supports_log_raw_dates {
-  my $self = shift;
-
-  # The '--date=raw' option to 'git log' was added in version 1.6.2
-  return 0 if ( versioncmp( $self->version , '1.6.2' ) eq -1 );
-  return 1;
-}
-
-sub supports_status_porcelain {
-  my $self = shift;
-
-  # The '--porcelain' option to git status was added in version 1.7.0
-  return 0 if ( versioncmp( $self->version , '1.7' ) eq -1 );
-  return 1;
-}
 
 sub version {
   my $self = shift;
@@ -403,6 +404,7 @@ sub _win32_multiline_commit_msg {
   return 1;
 }
 
+1;
 
 __END__
 
