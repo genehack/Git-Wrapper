@@ -13,7 +13,7 @@ delete $ENV{GIT_PAGER_IN_USE};
 
 use File::chdir;
 use File::Temp;
-use IPC::Open3      qw();
+use IPC::Run3 ();
 use Scalar::Util    qw(blessed);
 use Sort::Versions;
 use Symbol;
@@ -87,41 +87,27 @@ sub RUN {
   my( $parts , $stdin ) = _parse_args( $cmd , @_ );
 
   my @cmd = ( $self->git , @$parts );
-
   my( @out , @err );
 
   {
     local $CWD = $self->dir unless $cmd eq 'clone';
 
-    my ($wtr, $rdr, $err);
-
-    local *TEMP;
-    if ($^O eq 'MSWin32' && defined $stdin) {
-      my $file = File::Temp->new;
-      $file->autoflush(1);
-      $file->print($stdin);
-      $file->seek(0,0);
-      open TEMP, '<&=', $file;
-      $wtr = '<&TEMP';
-      undef $stdin;
-    }
-
-    $err = Symbol::gensym;
-
     print STDERR join(' ',@cmd),"\n" if $DEBUG;
 
+    my ($stdout, $stderr);
     # Prevent commands from running interactively
     local $ENV{GIT_EDITOR} = ' ';
+    IPC::Run3::run3(\@cmd, \$stdin, \$stdout, \$stderr);
 
-    my $pid = IPC::Open3::open3($wtr, $rdr, $err, @cmd);
-    print $wtr $stdin
-      if defined $stdin;
+    @out = map {
+      chomp;
+      $_;
+    } split(/\n/, $stdout);
 
-    close $wtr;
-    chomp(@out = <$rdr>);
-    chomp(@err = <$err>);
-
-    waitpid $pid, 0;
+    @err = map {
+      chomp;
+      $_;
+    } split(/\n/, $stderr);
   };
 
   print "status: $?\n" if $DEBUG;
