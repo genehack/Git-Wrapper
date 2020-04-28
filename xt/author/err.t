@@ -20,7 +20,8 @@ $git->config( 'user.email' , 'test@example.com' );
 # don't think people want to wait for it happen. So, author test. Hopefully
 # that's sufficient, it's a fairly simple bit of code.
 
-print "1\n";
+diag("1");
+
 
 {
   my @out = $git->remote( 'add' , 'test' , 'https://genehack@github.com/genehack/Git-Wrapper.git' );
@@ -32,22 +33,22 @@ print "1\n";
   is_deeply( \@out , [] , 'nothing on out' );
 }
 
-print "2\n";
+diag("2");
+
 
 {
   my @out = $git->remote({ 'verbose' => 1 } , 'update' );
 
   my $err = $git->ERR;
   is( ref $err , 'ARRAY' , 'get arrayref' );
-  print $err->[0];
+  diag($err->[0]);
   like( $err->[0] , qr/POST git-upload-pack/ , 'expected content' );
 
   my $alt_out = $git->OUT;
   is_deeply( \@out , $alt_out , 'outputs are the same' );
 }
 
-print "3\n";
-
+diag("3");
 
 
 done_testing();
