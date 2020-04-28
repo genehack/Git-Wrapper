@@ -35,6 +35,7 @@ $git->config( 'user.email' , 'test@example.com' );
 
   my $err = $git->ERR;
   is( ref $err , 'ARRAY' , 'get arrayref' );
+  print STDERR $err[0];
   like( $err->[0] , qr/POST git-upload-pack/ , 'expected content' );
 
   my $alt_out = $git->OUT;
