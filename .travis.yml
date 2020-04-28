@@ -9,6 +9,6 @@ perl:
 matrix:
   include:
     - perl: 5.28
-      env: COVERAGE=1
+      env: "COVERAGE=1 TEST_VERBOSE=1"
 before_install:
   - eval $(curl https://travis-perl.github.io/init) --auto
